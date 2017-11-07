@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="ISO-8859-1">
+		<title>Dimensions</title>
+  <!--  <script src="js/three.js"></script>  -->
+    	<script src="js/three.js"></script>
+  <!--	<script src="http://threejs.org/build/three.min.js"></script> -->
+  <!--  <script src="js/detectmobilebrowser.js"></script>  -->
+  <!--  <script src="js/RendererOverwrite.js"></script>  -->
+		<script src="js/Vector.js"></script>
+		<script src="js/Segment.js"></script>
+		<script src="js/Face.js"></script>
+		<script src="js/Figure.js"></script> 
+		<script src="js/Ncube.js"></script>
+		<script src="js/ShaderSource.js"></script>
+		<script src="js/Slider.js"></script>
+		<script src="js/Input.js"></script>
+		
+	</head>
+	<style type="text/css">
+	body {
+		overflow: hidden;
+	}
+	</style>
+	<body>
+
+		<script type="text/javascript">
+			
+		//	var origin = new Vector( [ 0.0, 0.0, 0.0] );
+
+			var scene, cam, rendy, cube, box, input, slide, glContext;
+
+			initialize();
+			renderMe();
+			
+			function initialize() {
+				
+				scene = new THREE.Scene();
+
+				cam = new THREE.PerspectiveCamera ( 30, 
+						window.innerWidth / window.innerHeight, 1, 100 );
+				cam.position.z = 9;	
+				alert( "width: " + window.innerWidth +
+				 " height: " + window.innerHeight );
+				
+				cube = new Ncube( 4, 1.75, [0.0], window );
+				scene.add( cube.mesh );
+
+				box = new THREE.BoxGeometry( 0.2, 0.2, 0.2);
+				box = new THREE.Mesh( box, new THREE.MeshBasicMaterial({color:0x0f0f00f}));
+				scene.add( box );
+				box.position.x = -2.5;
+				
+			//	var rendOver = new RenderOverwrite();
+				rendy = new THREE.WebGLRenderer( { antialias: true } );
+			//	rendy.renderBufferDirect = rendOver.renderBufferDirect;
+				rendy.setClearColor( 0xffffff );
+				rendy.setPixelRatio( window.devicePixelRatio );
+				rendy.setSize( window.innerWidth, window.innerHeight );
+			
+				document.body.appendChild( rendy.domElement );
+				document.ontouchstart = blockScroll;
+				document.ontouchmove = blockScroll;
+
+				input = new Input( cube.axisCount, window );
+		//		slide = new Slider( this.dimensions, window );
+				// Put these inside of Input and Slider function
+				window.addEventListener( 'keydown', function ( event ) { 
+					input.key( event, true ); }, false );
+				window.addEventListener( 'keyup', function ( event ) { 
+					input.key( event, false ); }, false );
+				window.addEventListener( 'touchstart', function ( event ) { 
+					cube.slide.handleStartTouch( event ); }, false );
+				window.addEventListener( 'touchmove', function ( event ) { 
+					cube.slide.handleDragTouch( event ); }, false );
+				window.addEventListener( 'touchend', function ( event ) { 
+					cube.slide.handleEndTouch( event ); }, false );
+			}
+			
+			function renderMe() {
+				requestAnimationFrame( renderMe );
+
+                                cube.updateFrame();
+			//	cube.updateRotation( input.getR() );
+			//	cube.uniforms.time.value += 0.01;
+		
+				rendy.render( scene, cam );
+			}
+
+			function blockScroll( e ) {
+				e.preventDefault();
+			}
+			
+		</script>
+
+
+	</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<script src="http://threejs.org/build/three.min.js"></script> 
+<script src="http://threejs.org/examples/js/controls/TrackballControls.js"></script>
+
+<head>
+	<title>Exercise</title>
+	<style>
+	body {
+		color: #808080;
+		font-family:Monospace;
+		font-size:13px;
+		text-align:center;
+		overflow: hidden;
+	}
+	</style>
+</head>
+<body>
+
+	<div id="info">
+	<b>Z</b> Push Camera Near Bound <b>X</b> Pull Camera Near Bound
+	</div>
+
+<script type="text/javascript">
+	
+	var cam, knotGeo, material, knotMesh, scene, renderer, controls;
+	var wD = false;
+	var sD = false;
+	scene = new THREE.Scene();
+
+	cam = new THREE.PerspectiveCamera( 50, 
+		   window.innerWidth / window.innerHeight, 6.3, 1000 );
+	cam.position.z = 10;
+
+	renderer = new THREE.WebGLRenderer( { antialias: true } );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.setClearColor( 0xffffff );
+	document.body.appendChild( renderer.domElement );
+
+	knotGeo  = new THREE.TorusKnotGeometry( 2.0, 0.7, 512, 64 );
+
+	material = new THREE.MeshPhongMaterial( {
+		color:    0x000000,
+		specular: 0xffffff,
+		emissive: 0x1a0000,
+		shininess: 400,
+		shading: THREE.SmoothShading
+	} );
+
+	knotMesh = new THREE.Mesh( knotGeo, material );
+	scene.add( knotMesh );
+	for (var i = 0; i < 5; i++ ) {
+		var light = new THREE.PointLight( 0xffffff );  
+		light.position.z = 15;
+		light.position.y = Math.sin( 2 * Math.PI * i / 5 ) * 30;
+		light.position.x = Math.cos( 2 * Math.PI * i / 5 ) * 30;
+		scene.add( light );
+	}
+	scene.add( new THREE.PointLight( 0xffffff ) );
+
+	controls = new THREE.TrackballControls( cam );
+	controls.rotateSpeed = 2.5;
+	controls.panSpeed = 0.2;
+	controls.dynamicDampingFactor = 0.3;
+	controls.addEventListener( 'change', render );
+
+	window.addEventListener( 'keydown', 
+		function ( event ) { keyDown ( event ) } );
+	window.addEventListener( 'keyup', 
+		function ( event ) { keyUp ( event ) } );
+	render();
+	animate();
+
+	function render() {
+		renderer.render( scene, cam );
+	}
+
+	function animate() {
+		requestAnimationFrame( animate );
+		if ( wD && cam.near < 12 ) {
+			cam.near += 0.05;
+		}
+		if ( sD && cam.near > 6.3  ) {
+			cam.near -= 0.05;
+		}
+		controls.update();
+		cam.updateProjectionMatrix();
+		render();
+	}
+
+	function keyDown ( event ) {
+		if ( event.keyCode === 90 ) {
+			wD = true;
+		} else if ( event.keyCode === 88 ) {
+			sD = true;
+		}
+	}
+
+	function keyUp ( event ) {
+		if ( event.keyCode === 90 ) {
+			wD = false;
+		} else if ( event.keyCode === 88 ) {
+			sD = false;
+		}
+	}
+
+</script>
+
+</body>
+</html>

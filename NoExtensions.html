@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="ISO-8859-1">
+		<meta name="description" content="Explore space of higher dimensions">
+		<title>Dimensions</title>
+  <!-- <script src="js/three.js"></script>  -->
+  <script src="http://threejs.org/build/three.min.js"></script> 
+  <!--  <script src="js/detectmobilebrowser.js"></script>  -->
+  <!--  <script src="js/RendererOverwrite.js"></script>  -->
+		<script src="js/Vector.js"></script>
+		<script src="js/Segment.js"></script>
+		<script src="js/Face.js"></script>
+		<script src="js/Figure.js"></script> 
+		<script src="js/Ncube.js"></script>
+		<script src="js/ShaderSourceNoExtensions.js"></script>
+		<script src="js/Slider.js"></script>
+		<script src="js/Input.js"></script>
+
+		<script src="js/Analytics.js"></script>
+		
+	</head>
+	<style type="text/css">
+	body {
+		overflow: hidden;
+                overflow-x:hidden
+	}
+
+	</style>
+	<body>
+
+		<script type="text/javascript">
+
+			var scene, cam, rendy, cube, box, slide, w, h, glContext;
+
+			initialize();
+			renderMe();
+			
+			function initialize() {
+				
+				scene = new THREE.Scene();
+				setDims();
+			//	alert( window.devicePixelRatio );
+
+				cam = new THREE.PerspectiveCamera ( 30, 
+						w / h, 1, 100 );
+				cam.position.z = 9;	
+				
+				cube = new Ncube( 4, 1.75, [0.0], window );
+				scene.add( cube.mesh );
+				
+				rendy = new THREE.WebGLRenderer( { antialias: true } );
+                        //        rendy.autoClear = false;
+		
+				rendy.setClearColor( 0xffffff );
+				if (!navigator.userAgent.match(/Android/i)) {
+				//	Not Andriod
+				//	rendy.setPixelRatio( window.devicePixelRatio );
+				}
+	
+				rendy.setSize( w, h );
+			//	alert( "width: " + w + " height: " + h );
+			
+				document.body.appendChild( rendy.domElement );
+				document.ontouchstart = blockScroll;
+				document.ontouchmove = blockScroll;
+				document.ontouchend = blockScroll;
+
+				// Put these inside of Input and Slider function
+				window.addEventListener( 'keydown', function ( event ) { 
+					cube.input.key( event, true ); }, false );
+				window.addEventListener( 'keyup', function ( event ) { 
+					cube.input.key( event, false ); }, false );
+
+				window.addEventListener( 'touchstart', function ( event ) { 
+					cube.slide.handleStartTouch( event ); }, false );
+
+				window.addEventListener( 'touchstart', function ( event ) { 
+					cube.slide.handleStartTouch( event ); }, false );
+				window.addEventListener( 'touchmove', function ( event ) { 
+					cube.slide.handleDragTouch( event ); }, false );
+				window.addEventListener( 'touchend', function ( event ) { 
+					cube.slide.handleEndTouch( event ); }, false );
+
+				window.addEventListener( 'mousedown', function ( event ) { 
+					cube.slide.handleStartClick( event ); }, false );
+				window.addEventListener( 'mousemove', function ( event ) { 
+					cube.slide.handleDragClick( event ); }, false );
+				window.addEventListener( 'mouseup', function ( event ) { 
+					cube.slide.handleEndClick( event ); }, false );
+
+				window.addEventListener( 'resize', function ( event ) {
+					cube.resize = true; 
+					setDims();
+					cam.aspect = w / h;
+					cam.updateProjectionMatrix();
+					rendy.setSize( w, h );
+					}, false );
+
+			}
+			
+			function renderMe() {
+				requestAnimationFrame( renderMe );
+
+				cube.updateFrame();
+		//		cube.uniforms.time.value += 0.01;
+		
+				rendy.render( scene, cam );
+			}
+
+			function blockScroll( e ) {
+				e.preventDefault();
+			}
+
+			function setDims() {				
+				w = window.innerWidth;// * window.devicePixelRatio;
+				h = window.innerHeight;// * window.devicePixelRatio;
+			}
+
+			
+		</script>
+
+
+	</body>
+</html>

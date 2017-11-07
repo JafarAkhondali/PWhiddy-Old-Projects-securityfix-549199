@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+	<body>
+		<script src="three.js"></script>
+		<script src="OrbitControls.js"></script>
+		<script>
+			var camera, scene, renderer, particles, pCount, geometry, posData, velData, mass, boxgeo, box, damp;
+			init();
+			animate();
+			function init() {
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setClearColor( 0xffff00, 1);
+				document.body.appendChild( document.body.appendChild(renderer.domElement) );
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+				controls.enableDamping = true;
+				controls.dampingFactor = 0.25;
+				controls.rotateSpeed = 0.2;
+				controls.enableZoom = false;
+
+				camera.position.z = 300;
+				scene = new THREE.Scene();
+				geometry = new THREE.BufferGeometry();
+				pCount = 900;
+				mass = 0.01;
+				damp = 0.98;
+				posData = new Float32Array(pCount*3);
+				velData = new Float32Array(pCount*3);
+				for (var i = 0; i < pCount; i ++ ) {
+					posData[i*3  ] = Math.random() * 50 - 25;
+					posData[i*3+1] = Math.random() * 50 - 15;
+					posData[i*3+2] = Math.random() * 50 - 25;
+				}
+				geometry.addAttribute( 'position', new THREE.BufferAttribute( posData, 3 ) );
+				particles = new THREE.Points( geometry, new THREE.PointsMaterial( {size:2, color:0x000022} ) );
+				scene.add(particles);
+				boxgeo = new THREE.BoxGeometry(200,200,200);
+				box = new THREE.Mesh(boxgeo, 
+					new THREE.MeshBasicMaterial({transparent:true, opacity:0.2, color:0xA00033}));
+				scene.add(box);
+			}
+			//
+			function animate() {
+				requestAnimationFrame( animate );
+				render();
+			}
+			function render() {
+				for (var i = 0; i<pCount-1; i++) {
+					for (var j = i+1; j<pCount; j++) {
+						var dx = posData[i*3  ] - posData[j*3  ];
+						var dy = posData[i*3+1] - posData[j*3+1];
+						var dz = posData[i*3+2] - posData[j*3+2];
+						var distanceSquare = dx*dx+dy*dy+dz*dz+0.1;
+						var fx = dx/distanceSquare;
+						var fy = dy/distanceSquare;
+						var fz = dz/distanceSquare;
+						velData[i*3  ] += fx*mass;
+						velData[i*3+1] += fy*mass;
+						velData[i*3+2] += fz*mass;
+						velData[j*3  ] -= fx*mass;
+						velData[j*3+1] -= fy*mass;
+						velData[j*3+2] -= fz*mass;
+					}
+				}
+				for (var p = 0; p<pCount; p++ ) {
+					if (Math.abs(posData[p*3+1])>100) {
+						posData[p*3+1] *= 0.995;
+						velData[p*3+1] *= -1;
+					}
+					if (Math.abs(posData[p*3  ])>100) {
+						posData[p*3  ] *= 0.995;
+						velData[p*3  ] *= -1;
+					}
+					if (Math.abs(posData[p*3+2])>100) {
+						posData[p*3+2] *= 0.995;
+						velData[p*3+2] *= -1;
+					}
+					velData[p*3+1] -= 0.04;
+					velData[p*3  ] *= damp;
+					velData[p*3+1] *= damp;
+					velData[p*3+2] *= damp;
+					posData[p*3  ] += velData[p*3  ];
+					posData[p*3+1] += velData[p*3+1];
+					posData[p*3+2] += velData[p*3+2];
+				}
+				geometry.attributes.position.needsUpdate = true;
+				controls.update();
+				renderer.render( scene, camera );
+			}
+		</script>
+	</body>
+</html>
